@@ -3,9 +3,52 @@ package ghosttohugo
 import (
 	"bytes"
 	"fmt"
-
+	humanize "github.com/dustin/go-humanize"
 	jww "github.com/spf13/jwalterweatherman"
 )
+
+func cardFile(payload interface{}) string {
+	m, ok := payload.(map[string]interface{})
+	if !ok {
+		jww.ERROR.Println("cardFile: payload not correct type")
+		return ""
+	}
+
+	src, ok := m["src"]
+	if !ok || src == nil {
+		jww.ERROR.Println("cardFile: missing src")
+		return ""
+	}
+
+	name, ok := m["fileName"]
+	if !ok {
+		jww.ERROR.Println("cardFile: missing fileName")
+	}
+
+	title, ok := m["fileTitle"]
+	if !ok {
+		title = ""
+	}
+
+	fileSize, ok := m["fileSize"]
+	if !ok {
+		jww.ERROR.Println("cardFile: missing fileSize")
+	}
+	
+	fileSizeFloat, ok := fileSize.(float64)
+	if !ok {
+		jww.ERROR.Println("cardFile: fileSize not float64")
+	}
+	size := humanize.Bytes(uint64(fileSizeFloat))
+
+	return fmt.Sprintf(
+		"{{< file title=%q name=%q src=%q size=%q >}}",
+		title,
+		name,
+		src,
+		size,
+	)
+}
 
 func cardBookmark(payload interface{}) string {
 	m, ok := payload.(map[string]interface{})

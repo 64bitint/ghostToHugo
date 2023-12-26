@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -45,6 +46,10 @@ func (c *Converter) createSite() error {
 	mkdir(c.path, "data")
 	mkdir(c.path, "themes")
 
+	os.WriteFile(
+		filepath.Join(c.path, "layouts/shortcodes/file.html"),
+		fileData,
+		0644)
 	ioutil.WriteFile(
 		filepath.Join(c.path, "layouts/shortcodes/bookmark.html"),
 		bookmarkData,
@@ -102,6 +107,21 @@ func (c Converter) createConfig() error {
 		c.site.Fs.Source,
 	)
 }
+
+var fileData = []byte(`<div class="kg-card kg-file-card kg-file-card-medium">
+<a class="kg-file-card-container" href="{{ .Get "src" }}" title="Download" download>
+	<div class="kg-file-card-contents">
+		{{ with .Get "title" }}<div class="kg-file-card-title">{{ . }}</div>{{ end }}
+		<div class="kg-file-card-metadata">
+			{{ with .Get "name" }}<div class="kg-file-card-filename">{{ . }}</div>{{ end }}
+			{{ with .Get "size" }}<div class="kg-file-card-filesize">{{ . }}</div>{{ end }}
+		</div>
+	</div>
+	<div class="kg-file-card-icon">
+		<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><defs><style>.a{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5px;}</style></defs><title>download-circle</title><polyline class="a" points="8.25 14.25 12 18 15.75 14.25"/><line class="a" x1="12" y1="6.75" x2="12" y2="18"/><circle class="a" cx="12" cy="12" r="11.25"/></svg>
+	</div>
+</a>
+</div>`)
 
 var bookmarkData = []byte(`<figure class="kg-card kg-bookmark-card">
   <a href="{{ .Get "url" }}" class="kg-bookmark-container">
